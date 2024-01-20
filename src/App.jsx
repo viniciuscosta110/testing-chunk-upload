@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react'
-
-import './App.css'
+import React, { useEffect, useState } from 'react';
+import './App.css';
 import { Dropzone } from "dropzone";
+
 function App() {
   return (
     <>
       <form id="csv-upload" className="">
-       <MyDropzone />
+        <MyDropzone />
       </form>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
 
 function MyDropzone() {
   const [fileContent, setFileContent] = useState('');
@@ -33,55 +33,42 @@ function MyDropzone() {
   }, []);
 
   useEffect(() => {
-    if(fileContent) {
-      const existingElement = document.getElementById("dropzoneElement1");
-      if (!existingElement) {
-        const divTest = document.createElement("div");
-        divTest.setAttribute('id', 'dropzoneElement1');
-        divTest.style.opacity = '0';
-        document.getElementById("root").appendChild(divTest);
-      }
+    if (fileContent && !dropzoneElement) {
+      const divTest = document.getElementById("dropzoneElement1");
 
-      const myDropzone = new Dropzone(
-        "div#dropzoneElement1", {
-          url: "/test", // Replace with your API endpoint
-          chunking: true,
-          parallelUploads: 2, // Adjust based on your requirements
-          chunkSize: 1000, // Set the chunk size (bytes)
-          params: {
-            tp_planilha: 2, // Additional parameters if needed
-          },
-          init: function () {
-            this.on("success", function (file, response) {
-              console.log("File uploaded successfully.", response);
-            });
-            this.on("error", function (file, errorMessage) {
-              console.error("Error uploading file.", errorMessage);
-            });
-          },
-        }
-      );
-  
-      setDropzoneElement(myDropzone)
+      // Initialize Dropzone here after adding the element to the DOM
+      const myDropzone = new Dropzone(divTest, {
+        url: "/test", // Replace with your API endpoint
+        chunking: true,
+        parallelUploads: 2,
+        chunkSize: 1000,
+        params: {
+          tp_planilha: 2,
+        },
+        init: function () {
+          this.on("success", function (file, response) {
+            console.log("File uploaded successfully.", response);
+          });
+          this.on("error", function (file, errorMessage) {
+            console.error("Error uploading file.", errorMessage);
+          });
+        },
+      });
+
+      setDropzoneElement(myDropzone);
+      
     }
   }, [fileContent]);
 
   useEffect(() => {
-    if(fileContent && dropzoneElement) {
+    if (fileContent && dropzoneElement) {
       const blob = new Blob([fileContent], { type: 'text/csv' });
-
-      // Create a File object
       const file = new File([blob], 'yourFile.csv', { type: 'text/csv' });
 
-
-      // Set the files property of the file input
-      dropzoneElement.files = [file];
-
-      // Trigger a change event to notify any change listeners
-      
-      console.log(dropzoneElement.addFile(file))
+      // Manually add the file to Dropzone
+      dropzoneElement.addFile(file);
     }
-    
   }, [fileContent, dropzoneElement]);
-}
 
+  return <div id="dropzoneElement1" style={{ display: 'none' }}></div>;
+}
